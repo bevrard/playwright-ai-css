@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="fr"><meta charset="utf-8"><title>CSS collector demo</title>
+<style>
+body { font: 16px system-ui; margin: 32px; --accent: #175cd3; }
+fbr-button { display: inline-block; margin: 8px; }
+fbr-button[_nghost-a] .btn[_ngcontent-a] { height: 42px; background: var(--accent); color: white; border: 0; padding: 0 20px; border-radius: 8px; }
+fbr-button:hover .btn span { text-decoration: underline; }
+.detail fbr-button[_nghost-a] .btn[_ngcontent-a] { height: 55px; }
+fbr-button .btn::before { content: '→ '; }
+@media (max-width: 767px) { fbr-button .btn { padding: 0 12px; } }
+@media (min-width: 4000px) { fbr-button .btn { height: 64px; } }
+@supports (display: grid) { fbr-button:focus-within .btn { outline: 2px solid orange; } }
+.modal { padding: 24px; background: #eee; }
+.modal fbr-button[_nghost-a] .btn[_ngcontent-a] { background: #6941c6; }
+.never-rendered { color: fuchsia; }
+@keyframes pulse { from { opacity: .8; } to { opacity: 1; } }
+</style>
+<body class="__PAGE_CLASS__">
+<h1>Démonstration de collecte CSS</h1>
+<p>Fixture HTML avec attributs Angular simulés, pas une application Angular compilée.</p>
+<fbr-button _nghost-a><button class="btn" _ngcontent-a><span _ngcontent-a>Enregistrer</span></button><fmo-child><span class="private-child">Frontière enfant</span></fmo-child></fbr-button>
+<p><button id="open">Ouvrir la modale</button></p><div id="slot"></div>
+<script>
+document.querySelector('#open').addEventListener('click', () => {
+ document.querySelector('#slot').innerHTML='<section class="modal" role="dialog"><fbr-button _nghost-a><button class="btn" _ngcontent-a><span _ngcontent-a>Confirmer</span></button></fbr-button></section>';
+});
+</script></body></html>

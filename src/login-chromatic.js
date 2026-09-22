@@ -1,0 +1,13 @@
+import { mkdir } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+import config from '../scenarios.chromatic.mjs';
+const require=createRequire(import.meta.url);
+await mkdir('.auth',{recursive:true});
+const url=new URL(config.scenarios[0].path,config.baseURL).href;
+console.log('Connecte-toi manuellement dans le navigateur ouvert, puis ferme la fenêtre pour enregistrer .auth/chromatic.json. Aucun mot de passe n’est demandé par ce script.');
+const cli=join(dirname(require.resolve('playwright')),'cli.js');
+const child=spawn(process.execPath,[cli,'codegen','--save-storage=.auth/chromatic.json','--viewport-size=1280,720',url],{stdio:'inherit'});
+child.on('error',error=>{console.error(error.message);process.exitCode=1;});
+child.on('exit',code=>{process.exitCode=code??1;});

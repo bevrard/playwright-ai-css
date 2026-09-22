@@ -1,0 +1,8 @@
+node_modules/
+artifacts/
+.auth/
+.env
+.DS_Store
+
+.env.*
+!.env.example
