@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {selectorProbes,collectPage} from '../src/selector-probes.js';
 import {append,compact} from '../src/exporter.js';
+import {collectMatchedStyles} from '../src/cdp-styles.js';
 
 test('AST probes broaden functional/escaped states and preserve unknown syntax',()=>{
  assert.equal(selectorProbes('fbr-button .btn:not(:disabled)')['fbr-button .btn:not(:disabled)'],'fbr-button .btn');
@@ -32,5 +33,20 @@ test('Chromium retains inactive state/media rules but filters unrelated complex 
   assert(!kept.some(s=>s.includes('.unrelated')));
   assert(kept.some(s=>s.includes('.optional-leaf')));
   assert(archive.dictionary.some(s=>s.includes('.unrelated')));assert.equal(snapshot.analysisVersion,'ast-superset-v1');
+ }finally{await browser.close();}
+});
+test('CDP evidence records matched declarations and compact computed styles without entering AI context',async()=>{
+ const browser=await chromium.launch();
+ try{
+  const page=await browser.newPage();
+  await page.setContent('<style>fbr-button .btn{color:rgb(1, 2, 3);padding:4px}</style><fbr-button><button class="btn">Test</button></fbr-button>');
+  const snapshot=await collectPage(page,{options:{selectors:['fbr-button']},label:'cdp'});
+  snapshot.matchedStyles=await collectMatchedStyles(page,snapshot);
+  const button=snapshot.nodes.find(node=>node.tag==='button');
+  const evidence=snapshot.matchedStyles.records.find(record=>record.node===button.id);
+  assert(evidence.matched.map(id=>snapshot.matchedStyles.rules[id]).some(rule=>rule.selector==='fbr-button .btn'&&rule.declarations.some(d=>d.name==='color')));
+  assert.equal(evidence.computed.color,'rgb(1, 2, 3)');
+  const archive={dictionary:[],captures:[]};append(archive,snapshot);
+  assert(!JSON.stringify(compact(archive)).includes('matchedStyles'));
  }finally{await browser.close();}
 });

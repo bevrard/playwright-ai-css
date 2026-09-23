@@ -47,7 +47,12 @@ export function collectInBrowser({ options = {}, label = 'normal' } = {}) {
       const id=nodes.length; nodeIDs.set(el,id);
       const attrs={};
       for(const a of el.attributes) if(a.name!=='value'&&a.name!=='srcdoc'&&!a.name.startsWith('on')) attrs[a.name]=a.value;
-      nodes.push({id, tag:el.localName, attrs, parent:null, children:[],
+      const path=[];for(let current=el;current;current=current.parentElement){
+        if(current===document.documentElement){path.unshift('html');break;}
+        const position=[...current.parentElement.children].indexOf(current)+1;
+        path.unshift(`${current.localName}:nth-child(${position})`);
+      }
+      nodes.push({id, tag:el.localName, path:path.join(' > '), attrs, parent:null, children:[],
         childElementCount:el.childElementCount, childNodeCount:el.childNodes.length,
         text:CONFIG.includeText ? [...el.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join('') : undefined,
         states:Object.fromEntries(['hover','active','focus','focus-visible','focus-within','disabled','checked','indeterminate'].map(s=>{

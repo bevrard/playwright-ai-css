@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 import { collectPage } from './selector-probes.js';
 import { append, compact } from './exporter.js';
 import { writeReadable } from './readable.js';
+import { collectMatchedStyles } from './cdp-styles.js';
 
 export async function run(config, { headed = false, outputRoot = 'artifacts', log = console.log } = {}) {
   const navigationAttempts=config.navigationAttempts || 1;
@@ -100,6 +101,10 @@ export async function run(config, { headed = false, outputRoot = 'artifacts', lo
           }
         }
         const snapshot=await collectPage(page,{options,label:`${scenario.name} / ${state.name}`});
+        if(config.matchedStyles!==false){
+          try{snapshot.matchedStyles=await collectMatchedStyles(page,snapshot);}
+          catch(error){snapshot.warnings.push(`Styles CDP indisponibles : ${error.message}`);}
+        }
         snapshot.scenario=item;
         snapshot.targetDefinitions=scenario.targets;
         snapshot.pageErrors=pageErrors;

@@ -57,6 +57,7 @@ test('CLI commands use stdin, a schema and optional model; strip inherited API k
 test('CSS validation catches unscoped, generated attributes, nested, empty and unaccounted sources',()=>{
  const input=buildInput(archive());assert.deepEqual(validateResult(result(),input).errors,[]);
  for(const css of ['fbr-button .btn {color:red}',':host .btn[_ngcontent-ab] {color:red}',':host {& .btn {color:red}}',':host { @media (min-width:10px) {:host .btn {color:red}}}','/* empty */','color:red;',':host .btn {color:'])assert(validateResult({...result(),css},input).errors.length,css);
+ assert(validateResult({...result(),css:':host-context(:is()) :host .btn {color:red}'},input).errors.some(e=>e.includes('Pseudo-classe vide')));
  assert(validateResult({...result(),coverage:[]},input).errors.length);
  assert(validateResult({...result(),coverage:[...result().coverage,...result().coverage]},input).errors.length);
  assert(validateResult({...result(),coverage:{}},input).errors.length);

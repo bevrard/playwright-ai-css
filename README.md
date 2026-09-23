@@ -1,6 +1,6 @@
 # Playwright — dossier CSS/DOM pour IA
 
-Ce projet collecte plusieurs pages et états d’un composant, conserve une archive détaillée et génère un dossier compact pour une IA. Une deuxième commande appelle OpenAI, Claude ou Gemini pour proposer un fichier CSS Angular. La génération est contrôlée statiquement ; la compilation Angular et la comparaison visuelle restent à effectuer.
+Ce projet collecte plusieurs pages et états d’un composant, conserve une archive détaillée et génère un dossier compact pour une IA. Une deuxième commande appelle OpenAI, Claude ou Gemini pour proposer un fichier CSS Angular. La génération est contrôlée statiquement et le CSS final est testé avec le compilateur Angular ; la comparaison visuelle reste à effectuer.
 
 ## Générer le CSS avec tes sessions Claude Code / Codex / Gemini CLI
 
@@ -79,6 +79,43 @@ Pas de limite arbitraire à 1, 2 ou 3 pages : choisir celles qui apportent des v
 Documentation : [Codex en mode non interactif](https://developers.openai.com/codex/noninteractive), [Claude Code en mode programmatique](https://code.claude.com/docs/en/headless).
 
 ## Utilisation principale : une liste d’URL et de sélecteurs
+
+## Préparation locale et validation sans IA
+
+La collecte Chromium ajoute `page-NNN/matched-styles.json`, issu du protocole DevTools. Ce fichier relie les nœuds aux règles correspondantes, déclarations inline et héritées, ainsi qu’à un sous-ensemble utile des styles calculés. Ces preuves restent locales dans `archive.json` et ne grossissent pas automatiquement le contexte envoyé au modèle.
+
+Préparer les conversions Angular dont l’ancrage est démontré :
+
+```sh
+npm run css:local
+```
+
+La commande écrit `local-css/COMPOSANT/COMPOSANT.safe.css`, `ambiguous.json` et `report.json`. Le CSS sûr conserve les groupes conditionnels observés. Les sélecteurs sans ancre de composant démontrable ne sont jamais devinés : ils restent dans `ambiguous.json` pour un traitement ciblé.
+
+Compléter les seuls sélecteurs ambigus par petits lots avec Terra, puis fusionner et valider toutes les déclarations :
+
+```sh
+npm run css:complete
+# Réglages optionnels :
+npm run css:complete -- --batch-size 20 --model gpt-5.6-terra --effort medium
+npm run css:complete:claude -- --input artifacts/DATE/archive.json --component fbr-button
+npm run css:complete:claude -- --dry-run --input artifacts/DATE/archive.json --component fbr-button
+```
+
+Chaque lot possède ses propres entrée, réponse et validation. Une plage d’identifiants, une déclaration absente ou un lot incomplet bloque la publication du CSS final.
+La variante Claude utilise `claude -p` avec ta session existante, sans clé API. Elle envoie les seules règles ambiguës par lots ; `--dry-run` affiche leurs tailles sans appel IA. Un lot déjà validé n’est repris que si son fournisseur, son modèle et son entrée correspondent.
+
+Avant la fusion, une vérification JavaScript rattache les règles ambiguës aux définitions de l’archive. Elle rétablit leurs conditions d’origine (`@media print`, autres médias et `@layer`) si la réponse IA les a omises. Quand une règle globale simple gagne à tort après conversion Angular alors que les styles calculés capturés prouvent une autre priorité, elle abaisse la spécificité de sa classe cible avec `:where()`. Les corrections figurent dans `report.json` sous `reconciliation` ; un rattachement incertain bloque la publication. Cette étape réutilise l’archive et les réponses enregistrées sans nouvel appel IA.
+
+`css:complete` teste la compilation Angular des règles générées. Si une règle sur `:host` bloque le compilateur, elle est d’abord réécrite avec `@scope (chemin complet)` dans `COMPOSANT.css`. Cette syntaxe demande un navigateur compatible avec CSS `@scope`. Si cette forme échoue également, la règle est déplacée vers `COMPOSANT.context.css`, à charger comme feuille **globale**. Le rapport `angularCompilation` distingue les règles réécrites (`scoped`) et déplacées (`moved`). Une règle problématique qui cible un élément interne reste signalée comme non résolue et bloque la publication.
+
+Après intégration du CSS dans l’application, refaire exactement la même collecte puis comparer les styles calculés :
+
+```sh
+npm run css:compare -- --before artifacts/AVANT/archive.json --after artifacts/APRES/archive.json
+```
+
+Cette comparaison est locale, propriété par propriété, et ne consomme aucun token. Elle exige des collectes récentes contenant les chemins DOM stables. Les screenshots restent des références visuelles ; le comparateur ne demande pas à une IA d’interpréter les pixels.
 
 Modifier **`pages.json`**, déjà rempli avec les trois URL Chromatic et les huit sélecteurs fournis, puis lancer :
 

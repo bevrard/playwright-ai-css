@@ -1,0 +1,26 @@
+{
+  "project": "chromatic-fbr-menu",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "timeout": 60000,
+  "navigationAttempts": 3,
+  "screenshots": false,
+  "pages": [
+    {
+      "name": "btbnc-rib-management",
+      "url": "https://66d85493cdda8b67219a1278-fjuautbnmg.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=variousoperations-downloadrib-e2e-rib-management-fhobtbnc-653--snapshot-1&viewMode=story",
+      "selectors": [
+        "body > fho-application-wrapper > btbnc-fho-application-container > btbnc-fho-base > div.website-wrapper.opened-main-sidebar.displayed-header.minimized-main-sidebar > fho-header > div > div > header > nav > ul > div > div > li:nth-child(7) > fbr-header-toolbar-menu-item > div > fbr-menu"
+      ]
+    },
+    {
+      "name": "cfcal-saving-detail",
+      "url": "https://66d854e7d3de36684545a982-efvfetcqns.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=pages-accounts-saving-e2e-savings-details-fhocfcal-395--saving-detail&viewMode=story",
+      "selectors": [
+        "body > fho-application-wrapper > cfcal-fho-application-container > cfcal-fho-base > div.website-wrapper.opened-main-sidebar.displayed-header.minimized-main-sidebar > fho-header > div > div > header > nav > ul > div > div > li:nth-child(7) > fbr-header-toolbar-menu-item > div > fbr-menu"
+      ]
+    }
+  ]
+}

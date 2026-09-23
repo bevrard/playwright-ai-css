@@ -40,6 +40,7 @@ export function validateResult(result,input) {
           if(first?.type!=='pseudo'||![':host',':host-context'].includes(first.value))errors.push(`Sélecteur non encapsulé : ${branch}`);
           if(!branch.nodes.some(n=>n.type==='pseudo'&&n.value===':host'))errors.push(`Ancre :host absente : ${branch}`);
           branch.walk(n=>{
+            if(n.type==='pseudo'&&[':is',':where'].includes(n.value)&&n.nodes?.every(option=>!option.nodes.length))errors.push(`Pseudo-classe vide sans correspondance : ${n.value}() dans ${branch}`);
             if(n.type==='tag'&&n.value.toLowerCase()===input.component.toLowerCase())errors.push('Le tag hôte subsiste dans un sélecteur.');
             if(n.type==='attribute'&&/^_ng(?:host|content)-/.test(n.attribute))errors.push('Attribut Angular généré subsistant.');
             if(n.type==='nesting')errors.push('Sélecteur & interdit.');

@@ -53,6 +53,7 @@ export async function writeReadable(output,bundle,capture) {
   await Promise.all([
     writeFile(join(folder,'dom.json'),JSON.stringify(dom,null,2)),
     writeFile(join(folder,'computed.json'),JSON.stringify(computed)),
+    writeFile(join(folder,'matched-styles.json'),JSON.stringify(capture.matchedStyles||{protocol:null,records:[]})),
     writeFile(join(folder,'source.css'),renderCSS(capture,bundle.dictionary)),
     writeFile(join(folder,'candidates.css'),'/* FILTRAGE HEURISTIQUE : consulter source.css pour les règles omises. */\n'+renderCSS(capture,bundle.dictionary,selectedIDs)),
     writeFile(join(folder,'sources.json'),JSON.stringify({url:capture.url,sheets:capture.sheets,omittedRuleIDs:candidate.omittedRuleIDs},null,2)),

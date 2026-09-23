@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Collecte CSS et DOM multi-pages pour une migration Angular assist\u00e9e par IA",
+  "description": "Collecte CSS et DOM multi-pages pour une migration Angular assistée par IA",
   "engines": {
     "node": ">=20.12"
   },
@@ -14,6 +14,10 @@
     "browsers": "playwright install chromium",
     "chromatic": "node src/cli.js --config scenarios.chromatic.mjs",
     "chromatic:login": "node src/login-chromatic.js",
+    "css:local": "node src/local-css-cli.js",
+    "css:compare": "node src/style-diff-cli.js",
+    "css:complete": "node src/complete-css-cli.js",
+    "css:complete:claude": "node src/complete-css-cli.js --provider claude",
     "ia:gemini": "node src/ai-cli.js --provider gemini",
     "ia:mistral-vibe": "MISTRAL_VIBE_CLI_COMMAND=vibe node src/ai-cli.js --provider mistral-vibe",
     "ia:claude": "node src/ai-cli.js --provider claude",
@@ -23,6 +27,7 @@
     "playwright": "1.63.0"
   },
   "dependencies": {
+    "@angular/compiler": "^19.2.14",
     "postcss": "8.5.28",
     "postcss-selector-parser": "7.1.6"
   }
