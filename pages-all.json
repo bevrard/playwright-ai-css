@@ -1,0 +1,52 @@
+{
+  "project": "chromatic-gen-all",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "prefixes": [
+    "fbr-",
+    "fmo-",
+    "fho-",
+    "fto-",
+    "mss-"
+  ],
+  "pages": [
+    {
+      "name": "cfcal-preferences-mobile-label",
+      "url": "https://66d854e7d3de36684545a982-efvfetcqns.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=pages-myprofile-e2e-preferences-check-label-application-mobile-fhocfcal-1370--preferences-application-mobile-label&viewMode=story"
+    },
+    {
+      "name": "btbnc-term-account-details",
+      "url": "https://66d85493cdda8b67219a1278-fjuautbnmg.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=synthesis-e2e-term-account-details-fhobtbnc-249--snapshot-1&viewMode=story"
+    },
+    {
+      "name": "btbnc-preferences",
+      "url": "https://66d85493cdda8b67219a1278-fjuautbnmg.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=myprofile-e2e-preferences-fhobtbnc-239--snapshot-1&viewMode=story"
+    },
+    {
+      "name": "btbnc-rib-management",
+      "url": "https://66d85493cdda8b67219a1278-fjuautbnmg.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=variousoperations-downloadrib-e2e-rib-management-fhobtbnc-653--snapshot-1&viewMode=story"
+    },
+    {
+      "name": "cfcal-saving-detail",
+      "url": "https://66d854e7d3de36684545a982-efvfetcqns.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=pages-accounts-saving-e2e-savings-details-fhocfcal-395--saving-detail&viewMode=story"
+    },
+    {
+      "name": "btbnc-summary-card",
+      "url": "https://66d85493cdda8b67219a1278-fjuautbnmg.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=cardmanagement-e2e-summary-card-fhobtbnc-1171--snapshot-1&viewMode=story"
+    },
+    {
+      "name": "btbnc-notifications",
+      "url": "https://66d85493cdda8b67219a1278-fjuautbnmg.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=myprofile-e2e-notifications-fhobtbnc-252--snapshot-1&viewMode=story"
+    },
+    {
+      "name": "cfcal-mobile",
+      "url": "https://66d854e7d3de36684545a982-efvfetcqns.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=pages-myprofile-e2e-mobile-fhocfcal-498--mobile&viewMode=story"
+    },
+    {
+      "name": "manage-notifications",
+      "url": "https://66d854e7d3de36684545a982-efvfetcqns.chromatic.com/iframe.html?globals=viewport%3Aw1280h720&id=pages-myprofile-e2e-manage-notifications-fhocfcal-696--manage-notifications&viewMode=story"
+    }
+  ]
+}

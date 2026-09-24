@@ -80,6 +80,25 @@ Documentation : [Codex en mode non interactif](https://developers.openai.com/cod
 
 ## Utilisation principale : une liste d’URL et de sélecteurs
 
+### Inventorier et générer tous les composants observés
+
+Le fichier [`pages-all.json`](pages-all.json) regroupe les URL Chromatic déjà utilisées dans ce projet. Pour ajouter une page, il suffit d'ajouter `{ "name": "...", "url": "https://.../iframe.html?..." }` dans `pages`. `prefixes` choisit les familles de composants (`fbr-`, `fmo-`, etc.). Les anciens manifestes contenant `selectors` sont acceptés, mais ces sélecteurs ne limitent **pas** l'inventaire : le DOM entier de chaque page est parcouru. Un éventuel `waitFor` permet d'attendre une partie de la page avant l'inventaire.
+
+```sh
+npm run css:inventory -- --pages pages-all.json --output artifacts/gen-all/mon-lot
+npm run css:gen-all -- --inventory artifacts/gen-all/mon-lot/inventory.json
+# Vérifier un composant avant le lot entier :
+npm run css:gen-all -- --inventory artifacts/gen-all/mon-lot/inventory.json --only fbr-button
+# CSS final : seuls les sélecteurs ambigus appellent Codex CLI :
+npm run css:gen-all -- --inventory artifacts/gen-all/mon-lot/inventory.json --complete --provider openai
+# Même processus avec Claude Code connecté :
+npm run css:gen-all -- --inventory artifacts/gen-all/mon-lot/inventory.json --complete --provider claude
+```
+
+`css:gen-all --pages pages-all.json` combine inventaire et génération dans une seule commande. Sans `--complete`, aucun modèle n'est appelé : chaque composant reçoit `COMPOSANT.safe.css` et `ambiguous.json`, mais pas nécessairement un CSS utilisable tel quel. Avec `--complete`, la commande réutilise `css:complete` pour les règles ambiguës et écrit `COMPOSANT.css` après ses contrôles. `--model`, `--effort` (Codex seulement) et `--batch-size` sont transmis à `css:complete`. L'option `--only nom1,nom2` limite le lot.
+
+`inventory.json` indique les composants, leur nombre d'instances et les variantes de classes/contexte observées. La collecte utilise le tag (`fbr-button`, par exemple) comme sélecteur pour toutes ses instances sur les pages où il a été vu. `summary.json` contient les chemins des archives et CSS, les échecs et les tokens rapportés par le CLI pour les générations `--complete`. Les collectes restent séparées par composant ; elles reparcourent donc les pages concernées, mais aucune page ni règle sûre n'est envoyée à l'IA. Une page en échec bloque le lot avant toute génération. La couverture reste celle des pages/états chargés ; les composants invisibles dans ces états ne peuvent pas être inventoriés. Les variantes d'inventaire ne servent pas à fusionner des sélecteurs CSS : ordre, médias et contexte restent préservés dans les archives de chaque composant.
+
 ## Préparation locale et validation sans IA
 
 La collecte Chromium ajoute `page-NNN/matched-styles.json`, issu du protocole DevTools. Ce fichier relie les nœuds aux règles correspondantes, déclarations inline et héritées, ainsi qu’à un sous-ensemble utile des styles calculés. Ces preuves restent locales dans `archive.json` et ne grossissent pas automatiquement le contexte envoyé au modèle.

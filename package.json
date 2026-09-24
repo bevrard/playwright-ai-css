@@ -16,6 +16,8 @@
     "chromatic:login": "node src/login-chromatic.js",
     "css:local": "node src/local-css-cli.js",
     "css:compare": "node src/style-diff-cli.js",
+    "css:inventory": "node src/gen-all-cli.js --mode inventory",
+    "css:gen-all": "node src/gen-all-cli.js",
     "css:complete": "node src/complete-css-cli.js",
     "css:complete:claude": "node src/complete-css-cli.js --provider claude",
     "ia:gemini": "node src/ai-cli.js --provider gemini",
