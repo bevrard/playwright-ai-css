@@ -28,3 +28,13 @@ test('restores print media and the observed 42px cascade without another AI call
   assert.deepEqual(await read(),{height:'42px',color:'rgb(0, 0, 0)'});
  }finally{await browser.close();}
 });
+
+test('lowers the leaf class of a local two-class rule when capture proves it loses',()=>{
+ const definition={id:'r0',kind:'CSSStyleRule',selector:'.toolbar-menu-item .counter-wrapper',css:'height: 17px;',role:'required'};
+ const input={definitions:[definition],captures:[]};
+ const archive={dictionary:['.toolbar-menu-item .counter-wrapper','height: 17px;','{"height":"20px"}'],captures:[{rules:[{selectorRef:0,cssRef:1,candidates:[{reason:'matches-current-context',nodes:[1]}]}],nodes:[{id:1,computedRef:2}]}]};
+ const responses=[{css:':host .toolbar-menu-item .counter-wrapper {height: 17px;}'}];
+ const result=reconcileAIResponses({input,archive,ambiguous:[definition],responses});
+ assert.deepEqual(result.report.unresolved,[]);
+ assert.match(result.css,/:host \.toolbar-menu-item :where\(\.counter-wrapper\)/);
+});

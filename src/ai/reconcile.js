@@ -61,9 +61,13 @@ function observedPriorityLoss(archive,definition){
 function lowerGlobalClassPriority(rule,sourceSelector){
   const match=/^\.([\w-]+) \.([\w-]+)$/.exec(sourceSelector);
   if(!match)return false;
-  const expected=`:host-context(.${match[1]}) :host .${match[2]}`;
-  if(rule.selector.trim()!==expected)return false;
-  rule.selector=`:host-context(.${match[1]}) :host :where(.${match[2]})`;
+  const selector=rule.selector.trim();
+  const expectedContext=`:host-context(.${match[1]}) :host .${match[2]}`;
+  const expectedLocal=`:host .${match[1]} .${match[2]}`;
+  if(selector!==expectedContext&&selector!==expectedLocal)return false;
+  rule.selector=selector===expectedContext
+    ?`:host-context(.${match[1]}) :host :where(.${match[2]})`
+    :`:host .${match[1]} :where(.${match[2]})`;
   return true;
 }
 

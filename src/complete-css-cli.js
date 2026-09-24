@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import {parseArgs} from 'node:util';
-import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import {readFile,mkdir,writeFile,rm} from 'node:fs/promises';
 import {resolve,dirname,join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {locateArchive} from './ai/run.js';
@@ -10,6 +10,7 @@ import {validateResult} from './ai/validate.js';
 import {prepareLocalCSS} from './local-css.js';
 import {separateAngularCSS} from './angular-css.js';
 import {reconcileAIResponses} from './ai/reconcile.js';
+import {verifyAndRebaseSelectors} from './ai/selector-verify.js';
 
 const prompt=`Convertis uniquement les définitions CSS fournies vers le composant Angular indiqué.
 Chaque sélecteur de style doit commencer par :host ou :host-context(...) et contenir l'ancre :host.
@@ -80,7 +81,10 @@ try{
     ...responses.flatMap(response=>response.coverage)];
   const context=input.definitions.filter(d=>d.role==='context').map(d=>d.id),dependencies=input.definitions.filter(d=>d.role==='dependency').map(d=>d.id);
   const reconciliation=reconcileAIResponses({input,archive,ambiguous:local.ambiguous,responses});
-  const result={css:local.css+'\n'+reconciliation.css.trim()+'\n',
+  const selectorVerification=reconciliation.report.unresolved.length
+    ?{css:reconciliation.css,report:{corrected:[],unresolved:[],unobserved:[],unchecked:[]}}
+    :await verifyAndRebaseSelectors({css:reconciliation.css,archive,component:input.component,definitions:local.ambiguous});
+  const result={css:local.css+'\n'+selectorVerification.css.trim()+'\n',
     coverage:[...requiredCoverage,
       ...(context.length?[{sourceIds:context,disposition:'not_applicable',reason:'Contexte extérieur conservé dans l’archive, hors CSS du composant.'}]:[]),
       ...(dependencies.length?[{sourceIds:dependencies,disposition:'dependency',reason:'Dépendances et groupes conditionnels conservés avec leurs règles utilisatrices.'}]:[])],
@@ -89,15 +93,18 @@ try{
   const separated=await separateAngularCSS(result.css,input.component);
   const validation=validateResult(result,input),report={provider,model,reasoningEffort,batchSize,batches:batches.length,usage,
     localRules:local.safe.length,aiRules:local.ambiguous.length,nonMatchingSourceIDs:local.report.nonMatchingSourceIDs,
-    status:validation.errors.length||reconciliation.report.unresolved.length?'invalid':validation.review.length?'needs_review':'generated_unverified',...validation,
+    status:validation.errors.length||reconciliation.report.unresolved.length||selectorVerification.report.unresolved.length?'invalid':validation.review.length?'needs_review':'generated_unverified',...validation,
     assumptions:result.assumptions,externalDependencies:result.externalDependencies,
-    reconciliation:reconciliation.report,angularCompilation:separated.report};
+    reconciliation:reconciliation.report,selectorVerification:selectorVerification.report,angularCompilation:separated.report};
   await writeFile(join(output,'response.json'),JSON.stringify(result,null,2));await writeFile(join(output,'report.json'),JSON.stringify(report,null,2));
   if(validation.errors.length)throw new Error(`Fusion invalide : ${validation.errors.slice(0,10).join(' | ')}`);
   if(reconciliation.report.unresolved.length)throw new Error(`Cascade ou conditions non restaurées : ${reconciliation.report.unresolved.map(item=>item.id).join(', ')}`);
+  if(selectorVerification.report.unresolved.length)throw new Error(`Sélecteurs non vérifiés : ${selectorVerification.report.unresolved.map(item=>item.id).join(', ')}`);
   if(separated.report.unresolved.length)throw new Error(`Règles Angular non déplaçables : ${separated.report.unresolved.map(item=>item.id).join(', ')}`);
   const cssPath=join(output,`${input.component}.css`),globalPath=join(output,`${input.component}.context.css`);
-  await writeFile(cssPath,separated.componentCSS);await writeFile(globalPath,separated.globalCSS);
-  console.log(`CSS du composant : ${cssPath}\nCSS global contextuel : ${globalPath}\nValidation : ${output}/report.json${validation.review.length?' (points à vérifier)':''}`);
+  await writeFile(cssPath,separated.componentCSS);
+  if(separated.globalCSS.trim())await writeFile(globalPath,separated.globalCSS);
+  else await rm(globalPath,{force:true});
+  console.log(`CSS du composant : ${cssPath}${separated.globalCSS.trim()?`\nCSS global contextuel : ${globalPath}`:''}\nValidation : ${output}/report.json${validation.review.length?' (points à vérifier)':''}`);
   process.exitCode=validation.review.length?2:0;
 }catch(error){console.error(error.message);process.exitCode=1;}
